@@ -3,70 +3,92 @@
  * Tarjeta para mostrar información de una mascota
  */
 
-import React from "react";
-import Link from "next/link";
-import Image from "next/image";
+"use client";
 
-export interface Pet {
-  id: string;
-  name: string;
-  type: "dog" | "cat";
-  age: number;
-  sex: "male" | "female";
-  city: string;
-  description: string;
-  photoUrl: string;
-  ownerId: string;
-  createdAt: number;
-}
+import React, { useState } from "react";
+import Link from "next/link";
+import { Heart, MapPin } from "lucide-react";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface PetCardProps {
-  pet: Pet;
+  id: string;
+  name: string;
+  species: string;
+  breed?: string;
+  age: string;
+  imageUrl: string;
+  location?: string;
+  className?: string;
 }
 
-export const PetCard: React.FC<PetCardProps> = ({ pet }) => {
+export const PetCard: React.FC<PetCardProps> = ({
+  id,
+  name,
+  species,
+  breed,
+  age,
+  imageUrl,
+  location,
+  className,
+}) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+  };
+
   return (
-    <Link href={`/pets/${pet.id}`}>
-      <div className="card cursor-pointer h-full">
-        <div className="relative w-full h-64 mb-4 rounded-lg overflow-hidden bg-gray-200">
-          {pet.photoUrl ? (
-            <Image
-              src={pet.photoUrl}
-              alt={pet.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    <Link href={`/pets/${id}`} className={cn("block group", className)}>
+      <div className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 overflow-hidden">
+        {/* Imagen */}
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <ImageWithFallback
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          {/* Botón de favorito */}
+          <button
+            onClick={handleFavoriteClick}
+            className={cn(
+              "absolute top-3 right-3 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm transition-all duration-200",
+              "hover:bg-white hover:scale-110",
+              isFavorite && "bg-[var(--color-primary)] text-white"
+            )}
+            aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+          >
+            <Heart
+              className={cn("w-5 h-5", isFavorite && "fill-current")}
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <span className="text-6xl">{pet.type === "dog" ? "🐕" : "🐈"}</span>
-            </div>
-          )}
+          </button>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-bold text-gray-800">{pet.name}</h3>
-            <span className="text-sm text-gray-500">
-              {pet.type === "dog" ? "🐕" : "🐈"} {pet.type === "dog" ? "Perro" : "Gato"}
-            </span>
+        {/* Información */}
+        <div className="p-5">
+          <h5 className="text-xl font-semibold text-[var(--color-primary)] mb-2">
+            {name}
+          </h5>
+
+          <div className="flex items-center gap-2 text-[var(--color-text-secondary)] mb-3">
+            <span className="text-sm">{breed || species}</span>
+            <span className="text-sm">•</span>
+            <span className="text-sm">{age}</span>
           </div>
 
-          <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
-            <span>{pet.age} {pet.age === 1 ? "año" : "años"}</span>
-            <span>•</span>
-            <span>{pet.sex === "male" ? "Macho" : "Hembra"}</span>
-            <span>•</span>
-            <span>📍 {pet.city}</span>
-          </div>
+          {location && (
+            <div className="flex items-center gap-2 text-[var(--color-text-muted)] mb-4">
+              <MapPin className="w-4 h-4" />
+              <span className="text-sm">{location}</span>
+            </div>
+          )}
 
-          <p className="text-gray-600 text-sm line-clamp-2">{pet.description}</p>
-
-          <div className="mt-4">
-            <span className="text-petro-500 font-medium text-sm hover:text-petro-600">
-              Ver detalles →
-            </span>
-          </div>
+          <Button variant="primary" size="sm" className="w-full">
+            Ver más
+          </Button>
         </div>
       </div>
     </Link>

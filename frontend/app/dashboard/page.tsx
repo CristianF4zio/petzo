@@ -1,16 +1,31 @@
 /**
  * Dashboard del usuario
- * Muestra las mascotas publicadas por el usuario autenticado
+ * Muestra las mascotas publicadas por el usuario autenticado y sus favoritos
  */
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { PetCard, Pet } from "@/components/PetCard";
-import { useAuth } from "@/contexts/AuthContext";
-import api from "@/lib/api";
+import React, { useState } from "react";
 import Link from "next/link";
+import { Heart, Eye, MessageCircle, Edit, Trash2, Plus } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PetCard } from "@/components/PetCard";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
+import { getAvailablePets, MockPet } from "@/lib/mockData";
 
 export default function DashboardPage() {
   return (
@@ -22,150 +37,307 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { user } = useAuth();
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Simulación de datos del usuario
+  const [userPets] = useState<MockPet[]>(
+    getAvailablePets().slice(0, 3) // Simulamos 3 mascotas del usuario
+  );
+  const [favoritePets] = useState<MockPet[]>(
+    getAvailablePets().slice(3, 6) // Simulamos 3 favoritas
+  );
 
-  useEffect(() => {
-    if (user) {
-      fetchUserPets();
-    }
-  }, [user]);
-
-  const fetchUserPets = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/pets", {
-        params: { ownerId: user?.uid },
-      });
-
-      if (response.data.success) {
-        setPets(response.data.data || []);
-      } else {
-        setError("Error al cargar tus mascotas");
-      }
-    } catch (err: any) {
-      console.error("Error al obtener mascotas del usuario:", err);
-      setError("Error al cargar tus mascotas");
-    } finally {
-      setLoading(false);
-    }
+  const stats = {
+    publications: userPets.length,
+    views: 234,
+    contacts: 12,
+    favorites: favoritePets.length,
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--color-background)]">
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-4xl lg:text-5xl font-bold text-[var(--color-text-primary)] mb-2">
               Mi Dashboard
             </h1>
-            <p className="text-gray-600">
-              Gestiona las mascotas que has publicado
+            <p className="text-xl text-[var(--color-text-secondary)]">
+              Gestiona tus publicaciones y favoritos
             </p>
           </div>
-          <Link href="/pets/new" className="btn-primary">
-            + Publicar Nueva Mascota
+          <Link href="/pets/new">
+            <Button variant="primary" size="lg">
+              <Plus className="w-5 h-5 mr-2" />
+              Publicar Mascota
+            </Button>
           </Link>
         </div>
 
-        {/* Información del usuario */}
-        {user && (
-          <div className="card mb-8 bg-gradient-to-r from-petro-500 to-petro-600 text-white">
-            <div className="flex items-center space-x-4">
-              {user.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt={user.displayName || "Usuario"}
-                  className="h-16 w-16 rounded-full border-2 border-white"
-                />
-              ) : (
-                <div className="h-16 w-16 rounded-full bg-white text-petro-600 flex items-center justify-center text-2xl font-bold">
-                  {user.email?.charAt(0).toUpperCase()}
-                </div>
-              )}
+        {/* Tarjeta de Usuario */}
+        <Card className="mb-8 bg-gradient-to-r from-[var(--color-primary)] to-[#ff8787] border-none text-white">
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20 border-4 border-white/30">
+                <AvatarImage src={user?.photoURL || undefined} />
+                <AvatarFallback className="bg-white text-[var(--color-primary)] text-2xl">
+                  {user?.email?.charAt(0).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
               <div>
-                <h2 className="text-xl font-semibold">
-                  {user.displayName || "Usuario"}
+                <h2 className="text-2xl font-bold mb-1">
+                  {user?.displayName || "Usuario PETZO"}
                 </h2>
-                <p className="text-petro-100">{user.email}</p>
+                <p className="text-white/90">{user?.email}</p>
+                <Badge className="mt-2 bg-white/20 hover:bg-white/30 border-none">
+                  Miembro activo
+                </Badge>
               </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card text-center">
-            <div className="text-3xl font-bold text-petro-600 mb-2">
-              {pets.length}
-            </div>
-            <div className="text-gray-600">
-              Mascota{pets.length !== 1 ? "s" : ""} Publicada{pets.length !== 1 ? "s" : ""}
-            </div>
-          </div>
-          <div className="card text-center">
-            <div className="text-3xl font-bold text-mint-600 mb-2">
-              {pets.filter((p) => p.type === "dog").length}
-            </div>
-            <div className="text-gray-600">Perros</div>
-          </div>
-          <div className="card text-center">
-            <div className="text-3xl font-bold text-mint-600 mb-2">
-              {pets.filter((p) => p.type === "cat").length}
-            </div>
-            <div className="text-gray-600">Gatos</div>
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-primary)]/10 mx-auto mb-3">
+                <Edit className="w-6 h-6 text-[var(--color-primary)]" />
+              </div>
+              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+                {stats.publications}
+              </div>
+              <div className="text-sm text-[var(--color-text-secondary)]">
+                Publicaciones
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-secondary)]/10 mx-auto mb-3">
+                <Eye className="w-6 h-6 text-[var(--color-secondary)]" />
+              </div>
+              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+                {stats.views}
+              </div>
+              <div className="text-sm text-[var(--color-text-secondary)]">
+                Visualizaciones
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-accent)]/10 mx-auto mb-3">
+                <MessageCircle className="w-6 h-6 text-[var(--color-accent)]" />
+              </div>
+              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+                {stats.contacts}
+              </div>
+              <div className="text-sm text-[var(--color-text-secondary)]">
+                Contactos
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-pink-100 mx-auto mb-3">
+                <Heart className="w-6 h-6 text-pink-500" />
+              </div>
+              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+                {stats.favorites}
+              </div>
+              <div className="text-sm text-[var(--color-text-secondary)]">
+                Favoritos
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Loading */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-petro-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Cargando tus mascotas...</p>
-          </div>
-        )}
+        {/* Tabs */}
+        <Tabs defaultValue="publications" className="space-y-6">
+          <TabsList className="w-full lg:w-auto">
+            <TabsTrigger value="publications" className="flex-1 lg:flex-none">
+              Mis Publicaciones
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="flex-1 lg:flex-none">
+              Favoritos
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex-1 lg:flex-none">
+              Mi Perfil
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-
-        {/* Lista de mascotas */}
-        {!loading && !error && (
-          <>
-            {pets.length === 0 ? (
-              <div className="card text-center py-12">
-                <div className="text-6xl mb-4">🐾</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  Aún no has publicado ninguna mascota
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Comienza compartiendo una mascota que necesite un hogar
-                </p>
-                <Link href="/pets/new" className="btn-primary">
-                  Publicar Mi Primera Mascota
-                </Link>
-              </div>
+          {/* Mis Publicaciones */}
+          <TabsContent value="publications" className="space-y-6">
+            {userPets.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <div className="text-6xl mb-4">🐾</div>
+                  <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-2">
+                    Aún no has publicado ninguna mascota
+                  </h3>
+                  <p className="text-[var(--color-text-secondary)] mb-6">
+                    Comienza compartiendo una mascota que necesite un hogar
+                  </p>
+                  <Link href="/pets/new">
+                    <Button variant="primary" size="lg">
+                      <Plus className="w-5 h-5 mr-2" />
+                      Publicar Mi Primera Mascota
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
             ) : (
-              <>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Tus Mascotas Publicadas
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {pets.map((pet) => (
-                    <PetCard key={pet.id} pet={pet} />
-                  ))}
-                </div>
-              </>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userPets.map((pet) => (
+                  <div key={pet.id} className="relative group">
+                    <PetCard
+                      id={pet.id}
+                      name={pet.name}
+                      species={pet.species}
+                      breed={pet.breed}
+                      age={pet.age}
+                      imageUrl={pet.images[0]}
+                      location={pet.city}
+                    />
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link href={`/pets/${pet.id}/edit`}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="h-9 w-9 p-0 shadow-lg"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 w-9 p-0 bg-white border-red-500 text-red-500 hover:bg-red-50 shadow-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </>
-        )}
+          </TabsContent>
+
+          {/* Favoritos */}
+          <TabsContent value="favorites" className="space-y-6">
+            {favoritePets.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <div className="text-6xl mb-4">❤️</div>
+                  <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-2">
+                    No tienes favoritos aún
+                  </h3>
+                  <p className="text-[var(--color-text-secondary)] mb-6">
+                    Explora mascotas y guarda tus favoritas para verlas más tarde
+                  </p>
+                  <Link href="/pets">
+                    <Button variant="primary" size="lg">
+                      Explorar Mascotas
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favoritePets.map((pet) => (
+                  <PetCard
+                    key={pet.id}
+                    id={pet.id}
+                    name={pet.name}
+                    species={pet.species}
+                    breed={pet.breed}
+                    age={pet.age}
+                    imageUrl={pet.images[0]}
+                    location={pet.city}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Mi Perfil */}
+          <TabsContent value="profile" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Información Personal</CardTitle>
+                <CardDescription>
+                  Actualiza tu información de perfil
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">Nombre completo</Label>
+                    <Input
+                      id="name"
+                      placeholder="Tu nombre"
+                      defaultValue={user?.displayName || ""}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Correo electrónico</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="tu@email.com"
+                      defaultValue={user?.email || ""}
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Teléfono</Label>
+                    <Input id="phone" type="tel" placeholder="+34 XXX XXX XXX" />
+                  </div>
+                  <div>
+                    <Label htmlFor="city">Ciudad</Label>
+                    <Input id="city" placeholder="Tu ciudad" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="bio">Biografía</Label>
+                  <Input
+                    id="bio"
+                    placeholder="Cuéntanos sobre ti y tu amor por los animales"
+                  />
+                </div>
+
+                <Button variant="primary" className="w-full md:w-auto">
+                  Guardar Cambios
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuración de Cuenta</CardTitle>
+                <CardDescription>
+                  Administra tu cuenta y privacidad
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button variant="outline" className="w-full">
+                  Cambiar Contraseña
+                </Button>
+                <Button variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50">
+                  Eliminar Cuenta
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
 }
-
