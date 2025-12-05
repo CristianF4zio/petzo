@@ -12,6 +12,7 @@ import {
   User,
 } from "firebase/auth";
 import { auth } from "./firebaseClient";
+import api from "./api";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -25,6 +26,19 @@ export const loginWithEmail = async (email: string, password: string) => {
       email,
       password
     );
+
+    // Asegurar que el usuario esté guardado en Firestore
+    try {
+      await api.post("/auth/register", {
+        displayName: userCredential.user.displayName || null,
+        photoURL: userCredential.user.photoURL || null,
+        emailVerified: userCredential.user.emailVerified,
+      });
+    } catch (error) {
+      console.error("Error al guardar usuario en Firestore:", error);
+      // No fallar el login si hay error al guardar en Firestore
+    }
+
     return {
       success: true,
       user: userCredential.user,
@@ -50,6 +64,18 @@ export const registerWithEmail = async (
       email,
       password
     );
+
+    // Guardar usuario en Firestore después del registro
+    try {
+      await api.post("/auth/register", {
+        displayName: userCredential.user.displayName || null,
+        photoURL: userCredential.user.photoURL || null,
+      });
+    } catch (error) {
+      console.error("Error al guardar usuario en Firestore:", error);
+      // No fallar el registro si hay error al guardar en Firestore
+    }
+
     return {
       success: true,
       user: userCredential.user,
@@ -68,6 +94,19 @@ export const registerWithEmail = async (
 export const loginWithGoogle = async () => {
   try {
     const userCredential = await signInWithPopup(auth, googleProvider);
+
+    // Guardar o actualizar usuario en Firestore después del login con Google
+    try {
+      await api.post("/auth/register", {
+        displayName: userCredential.user.displayName || null,
+        photoURL: userCredential.user.photoURL || null,
+        emailVerified: userCredential.user.emailVerified,
+      });
+    } catch (error) {
+      console.error("Error al guardar usuario en Firestore:", error);
+      // No fallar el login si hay error al guardar en Firestore
+    }
+
     return {
       success: true,
       user: userCredential.user,

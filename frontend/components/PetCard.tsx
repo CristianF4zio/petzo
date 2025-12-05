@@ -45,7 +45,7 @@ export const PetCard: React.FC<PetCardProps> = ({
     <Link href={`/pets/${id}`} className={cn("block group", className)}>
       <div className="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 overflow-hidden">
         {/* Imagen */}
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-[3/2] overflow-hidden">
           <ImageWithFallback
             src={imageUrl}
             alt={name}
