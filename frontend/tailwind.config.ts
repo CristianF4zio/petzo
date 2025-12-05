@@ -9,31 +9,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Colores suaves para PETZO
-        'petro': {
-          50: '#e6f0f2',
-          100: '#b3d1d6',
-          200: '#80b2ba',
-          300: '#4d939e',
-          400: '#1a7482',
-          500: '#005566', // Azul petróleo principal
-          600: '#004449',
-          700: '#003333',
-          800: '#002222',
-          900: '#001111',
-        },
-        'mint': {
-          50: '#f0fdf9',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#14b8a6', // Menta principal
-          600: '#0d9488',
-          700: '#0f766e',
-          800: '#115e59',
-          900: '#134e4a',
-        },
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        accent: 'var(--color-accent)',
+        tertiary: 'var(--color-tertiary)',
+        background: 'var(--color-background)',
+        surface: 'var(--color-surface)',
+        border: 'var(--color-border)',
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-muted': 'var(--color-text-muted)',
+      },
+      borderRadius: {
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        full: 'var(--radius-full)',
+      },
+      boxShadow: {
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        '2xl': 'var(--shadow-2xl)',
+      },
+      transitionDuration: {
+        '200': '200ms',
+        '300': '300ms',
+        '500': '500ms',
       },
     },
   },
