@@ -49,6 +49,20 @@ router.post(
       });
     }
 
+    // Bandera para evitar múltiples respuestas
+    let responseSent = false;
+
+    const sendErrorResponse = (error: any, message: string) => {
+      if (!responseSent) {
+        responseSent = true;
+        console.error(message, error);
+        res.status(500).json({
+          success: false,
+          error: message,
+        });
+      }
+    };
+
     try {
       // Crear un stream desde el buffer del archivo
       const stream = cloudinary.uploader.upload_stream(
@@ -66,43 +80,54 @@ router.post(
         },
         (error, result) => {
           if (error) {
-            console.error("Error al subir imagen a Cloudinary:", error);
-            return res.status(500).json({
-              success: false,
-              error: "Error al subir la imagen",
-            });
+            return sendErrorResponse(error, "Error al subir la imagen");
           }
 
           if (!result) {
-            return res.status(500).json({
-              success: false,
-              error: "No se recibió respuesta de Cloudinary",
-            });
+            return sendErrorResponse(null, "No se recibió respuesta de Cloudinary");
           }
 
-          res.json({
-            success: true,
-            data: {
-              url: result.secure_url,
-              publicId: result.public_id,
-              width: result.width,
-              height: result.height,
-            },
-          });
+          if (!responseSent) {
+            responseSent = true;
+            res.json({
+              success: true,
+              data: {
+                url: result.secure_url,
+                publicId: result.public_id,
+                width: result.width,
+                height: result.height,
+              },
+            });
+          }
         }
       );
+
+      // Manejar errores del stream de Cloudinary
+      stream.on("error", (error) => {
+        sendErrorResponse(error, "Error en el stream de Cloudinary");
+      });
 
       // Convertir el buffer a stream y subirlo
       const bufferStream = new Readable();
       bufferStream.push(req.file.buffer);
       bufferStream.push(null);
-      bufferStream.pipe(stream);
-    } catch (error) {
-      console.error("Error al procesar la imagen:", error);
-      res.status(500).json({
-        success: false,
-        error: "Error al procesar la imagen",
+
+      // Manejar errores del bufferStream
+      bufferStream.on("error", (error) => {
+        sendErrorResponse(error, "Error al leer el archivo");
       });
+
+      // Manejar errores durante el pipe
+      bufferStream.on("end", () => {
+        // Stream completado exitosamente
+      });
+
+      // Pipe con manejo de errores
+      bufferStream.pipe(stream).on("error", (error) => {
+        sendErrorResponse(error, "Error al transferir el archivo");
+      });
+    } catch (error) {
+      sendErrorResponse(error, "Error al procesar la imagen");
     }
   })
 );
