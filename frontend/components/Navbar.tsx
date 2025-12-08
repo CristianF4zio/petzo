@@ -5,14 +5,16 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { PawPrint, Menu, X } from "lucide-react";
+import { PawPrint, Menu, X, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { logout } from "@/lib/auth";
+import { getUnreadMessages } from "@/lib/services/messages.service";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
@@ -20,6 +22,26 @@ export const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      loadUnreadCount();
+      // Recargar cada 30 segundos
+      const interval = setInterval(loadUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadUnreadCount = async () => {
+    if (!user) return;
+    try {
+      const unreadMessages = await getUnreadMessages();
+      setUnreadMessagesCount(unreadMessages.length);
+    } catch (err) {
+      console.error("Error al cargar mensajes no leídos:", err);
+    }
+  };
 
   const handleLogout = async () => {
     const result = await logout();
@@ -75,6 +97,17 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-4">
             {user ? (
               <>
+                <Link href="/messages" className="relative">
+                  <Button variant="ghost" size="sm">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Mensajes
+                  </Button>
+                  {unreadMessagesCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                    </span>
+                  )}
+                </Link>
                 <Link href="/dashboard">
                   <Button variant="ghost" size="sm">
                     Mi Dashboard
@@ -145,6 +178,17 @@ export const Navbar = () => {
               <div className="border-t border-[var(--color-border)] pt-4 flex flex-col gap-3">
                 {user ? (
                   <>
+                    <Link href="/messages" onClick={closeMobileMenu} className="relative">
+                      <Button variant="ghost" size="sm" className="w-full">
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Mensajes
+                        {unreadMessagesCount > 0 && (
+                          <Badge className="ml-2 bg-red-500 text-white">
+                            {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    </Link>
                     <Link href="/dashboard" onClick={closeMobileMenu}>
                       <Button variant="ghost" size="sm" className="w-full">
                         Mi Dashboard

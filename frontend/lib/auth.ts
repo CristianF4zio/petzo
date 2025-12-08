@@ -143,3 +143,56 @@ export const getCurrentUser = (): User | null => {
   return auth.currentUser;
 };
 
+/**
+ * Cambiar contraseña del usuario
+ */
+export const changePassword = async (newPassword: string) => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      return {
+        success: false,
+        error: "No hay usuario autenticado",
+      };
+    }
+
+    await user.updatePassword(newPassword);
+
+    return {
+      success: true,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "Error al cambiar la contraseña",
+    };
+  }
+};
+
+/**
+ * Eliminar cuenta del usuario
+ */
+export const deleteAccount = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      return {
+        success: false,
+        error: "No hay usuario autenticado",
+      };
+    }
+
+    // Eliminar usuario de Firebase Auth
+    await user.delete();
+
+    return {
+      success: true,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "Error al eliminar la cuenta",
+    };
+  }
+};
+

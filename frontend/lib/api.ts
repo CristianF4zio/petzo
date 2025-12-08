@@ -32,6 +32,11 @@ api.interceptors.request.use(
       }
     }
 
+    // Si es FormData, eliminar Content-Type para que axios lo establezca automáticamente
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
   (error) => {

@@ -9,6 +9,8 @@ import { verifyFirebaseToken, AuthenticatedRequest } from "../middleware/auth";
 import cloudinary from "../config/cloudinary";
 import { asyncHandler } from "../middleware/errorHandler";
 import { Readable } from "stream";
+import { validateImageBuffer } from "../utils/imageValidator";
+import logger from "../config/logger";
 
 const router = Router();
 
@@ -23,6 +25,7 @@ const upload = multer({
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
+      logger.warn(`Intento de subir archivo no imagen: ${file.mimetype}`);
       cb(new Error("Solo se permiten archivos de imagen"));
     }
   },
@@ -55,7 +58,7 @@ router.post(
     const sendErrorResponse = (error: any, message: string) => {
       if (!responseSent) {
         responseSent = true;
-        console.error(message, error);
+        logger.error(message, error);
         res.status(500).json({
           success: false,
           error: message,
@@ -64,6 +67,24 @@ router.post(
     };
 
     try {
+      // Verificar que Cloudinary esté configurado
+      if (!cloudinary) {
+        logger.error("Cloudinary no está configurado");
+        return res.status(503).json({
+          success: false,
+          error: "Cloudinary no está configurado. Por favor, configura las credenciales en el archivo .env",
+        });
+      }
+
+      // Validar que el archivo es realmente una imagen usando magic bytes
+      if (!validateImageBuffer(req.file.buffer, req.file.mimetype)) {
+        logger.warn(`Archivo con mimetype ${req.file.mimetype} no es una imagen válida según magic bytes`);
+        return res.status(400).json({
+          success: false,
+          error: "El archivo no es una imagen válida",
+        });
+      }
+
       // Crear un stream desde el buffer del archivo
       const stream = cloudinary.uploader.upload_stream(
         {
@@ -80,7 +101,19 @@ router.post(
         },
         (error, result) => {
           if (error) {
-            return sendErrorResponse(error, "Error al subir la imagen");
+            logger.error("Error de Cloudinary:", error);
+            let errorMessage = "Error al subir la imagen";
+            
+            // Mensajes más específicos según el tipo de error
+            if (error.http_code === 401) {
+              errorMessage = "Error de autenticación con Cloudinary. Verifica que las credenciales (CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET) estén correctamente configuradas en el archivo .env";
+            } else if (error.message?.includes("Invalid Signature")) {
+              errorMessage = "Firma inválida de Cloudinary. Verifica que CLOUDINARY_API_SECRET esté correctamente configurado en el archivo .env";
+            } else if (error.message) {
+              errorMessage = `Error de Cloudinary: ${error.message}`;
+            }
+            
+            return sendErrorResponse(error, errorMessage);
           }
 
           if (!result) {

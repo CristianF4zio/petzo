@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import api from "@/lib/api";
+import { uploadImage } from "@/lib/services/uploads.service";
 
 interface UploadButtonProps {
   onUploadSuccess: (url: string) => void;
@@ -51,24 +51,12 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("photo", file);
-
-      const response = await api.post("/uploads/pet-photo", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.data.success) {
-        onUploadSuccess(response.data.data.url);
-      } else {
-        throw new Error("Error al subir la imagen");
-      }
+      const result = await uploadImage(file);
+      onUploadSuccess(result.url);
     } catch (error: any) {
       console.error("Error al subir imagen:", error);
       onUploadError?.(
-        error.response?.data?.error || "Error al subir la imagen"
+        error.response?.data?.error || error.message || "Error al subir la imagen"
       );
       setPreview(null);
     } finally {

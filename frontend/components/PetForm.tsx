@@ -7,9 +7,23 @@
 
 import { useState, FormEvent } from "react";
 import { UploadButton } from "./UploadButton";
-import api from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { Pet } from "./PetCard";
+import { createPet, updatePet, Pet as BackendPet } from "@/lib/services/pets.service";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, X } from "lucide-react";
+import { getCities } from "@/lib/mockData";
 
 interface PetFormProps {
   pet?: Pet; // Si se proporciona, es edición
@@ -43,6 +57,47 @@ export const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess }) => {
       return;
     }
 
+    // Validaciones de longitud
+    if (formData.name.trim().length < 2) {
+      setError("El nombre debe tener al menos 2 caracteres");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.name.trim().length > 100) {
+      setError("El nombre no puede exceder 100 caracteres");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.city.trim().length < 2) {
+      setError("La ciudad debe tener al menos 2 caracteres");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.description && formData.description.length > 2000) {
+      setError("La descripción no puede exceder 2000 caracteres");
+      setLoading(false);
+      return;
+    }
+
+    // Validar edad
+    if (formData.age < 0 || formData.age > 30) {
+      setError("La edad debe estar entre 0 y 30 años");
+      setLoading(false);
+      return;
+    }
+
+    // Validar URL de foto
+    try {
+      new URL(photoUrl);
+    } catch {
+      setError("La URL de la foto no es válida");
+      setLoading(false);
+      return;
+    }
+
     try {
       const petData = {
         ...formData,
@@ -51,10 +106,10 @@ export const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess }) => {
 
       if (pet) {
         // Editar mascota existente
-        await api.put(`/pets/${pet.id}`, petData);
+        await updatePet(pet.id, petData);
       } else {
         // Crear nueva mascota
-        await api.post("/pets", petData);
+        await createPet(petData);
       }
 
       if (onSuccess) {
@@ -65,7 +120,7 @@ export const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess }) => {
     } catch (err: any) {
       console.error("Error al guardar mascota:", err);
       setError(
-        err.response?.data?.error || "Error al guardar la mascota"
+        err.response?.data?.error || err.message || "Error al guardar la mascota"
       );
     } finally {
       setLoading(false);
@@ -73,54 +128,61 @@ export const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Nombre de la mascota *
-        </label>
-        <input
+        <Label htmlFor="name">
+          Nombre de la mascota <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="name"
           type="text"
           value={formData.name}
           onChange={(e) =>
             setFormData({ ...formData, name: e.target.value })
           }
-          className="input-field"
+          placeholder="Ej: Max, Luna, Rocky..."
           required
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tipo *
-          </label>
-          <select
+          <Label htmlFor="type">
+            Tipo <span className="text-red-500">*</span>
+          </Label>
+          <Select
             value={formData.type}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setFormData({
                 ...formData,
-                type: e.target.value as "dog" | "cat",
+                type: value as "dog" | "cat",
               })
             }
-            className="input-field"
             required
           >
-            <option value="dog">🐕 Perro</option>
-            <option value="cat">🐈 Gato</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona el tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dog">🐕 Perro</SelectItem>
+              <SelectItem value="cat">🐈 Gato</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Edad (años) *
-          </label>
-          <input
+          <Label htmlFor="age">
+            Edad (años) <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="age"
             type="number"
             min="0"
             max="30"
@@ -128,7 +190,6 @@ export const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess }) => {
             onChange={(e) =>
               setFormData({ ...formData, age: parseInt(e.target.value) || 0 })
             }
-            className="input-field"
             required
           />
         </div>
@@ -136,109 +197,132 @@ export const PetForm: React.FC<PetFormProps> = ({ pet, onSuccess }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Sexo *
-          </label>
-          <select
+          <Label htmlFor="sex">
+            Sexo <span className="text-red-500">*</span>
+          </Label>
+          <Select
             value={formData.sex}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setFormData({
                 ...formData,
-                sex: e.target.value as "male" | "female",
+                sex: value as "male" | "female",
               })
             }
-            className="input-field"
             required
           >
-            <option value="male">Macho</option>
-            <option value="female">Hembra</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona el sexo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="male">♂️ Macho</SelectItem>
+              <SelectItem value="female">♀️ Hembra</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ciudad *
-          </label>
-          <input
-            type="text"
+          <Label htmlFor="city">
+            Ciudad <span className="text-red-500">*</span>
+          </Label>
+          <Select
             value={formData.city}
-            onChange={(e) =>
-              setFormData({ ...formData, city: e.target.value })
+            onValueChange={(value) =>
+              setFormData({ ...formData, city: value })
             }
-            className="input-field"
             required
-          />
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona una ciudad" />
+            </SelectTrigger>
+            <SelectContent>
+              {getCities().map((city) => (
+                <SelectItem key={city} value={city}>
+                  {city}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Descripción
-        </label>
-        <textarea
+        <Label htmlFor="description">Descripción</Label>
+        <Textarea
+          id="description"
           value={formData.description}
           onChange={(e) =>
             setFormData({ ...formData, description: e.target.value })
           }
           rows={4}
-          className="input-field"
           placeholder="Describe a la mascota..."
         />
+        <p className="text-sm text-[var(--color-text-muted)] mt-2">
+          Una buena descripción ayuda a encontrar el hogar perfecto
+        </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Foto de la mascota *
-        </label>
+        <Label>
+          Foto de la mascota <span className="text-red-500">*</span>
+        </Label>
         {photoUrl ? (
-          <div className="space-y-2">
-            <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-300">
+          <div className="space-y-2 mt-2">
+            <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-[var(--color-border)]">
               <img
                 src={photoUrl}
                 alt="Foto de la mascota"
                 className="w-full h-full object-cover"
               />
             </div>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setPhotoUrl("")}
-              className="text-sm text-red-600 hover:text-red-700"
             >
+              <X className="w-4 h-4 mr-2" />
               Cambiar foto
-            </button>
+            </Button>
           </div>
         ) : (
-          <UploadButton
-            onUploadSuccess={(url) => {
-              setPhotoUrl(url);
-            }}
-            onUploadError={(error) => {
-              setError(error);
-            }}
-            label="Subir Foto"
-          />
+          <div className="mt-2">
+            <UploadButton
+              onUploadSuccess={(url) => {
+                setPhotoUrl(url);
+                setError(null);
+              }}
+              onUploadError={(error) => {
+                setError(error);
+              }}
+              label="Subir Foto"
+            />
+          </div>
         )}
       </div>
 
-      <div className="flex space-x-4">
-        <button
+      <div className="flex flex-col sm:flex-row gap-4 pt-4">
+        <Button
           type="submit"
+          variant="primary"
+          size="lg"
+          className="flex-1"
           disabled={loading}
-          className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading
             ? "Guardando..."
             : pet
             ? "Actualizar Mascota"
             : "Publicar Mascota"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
+          size="lg"
           onClick={() => router.back()}
-          className="btn-outline"
+          disabled={loading}
         >
           Cancelar
-        </button>
+        </Button>
       </div>
     </form>
   );

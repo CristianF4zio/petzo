@@ -18,6 +18,7 @@ export interface UserData {
   phone?: string;
   city?: string;
   bio?: string;
+  role?: "admin" | "user";
 }
 
 /**
@@ -93,7 +94,12 @@ export const getUserFromFirestore = async (uid: string): Promise<UserData | null
       return null;
     }
 
-    return userDoc.data() as UserData;
+    const data = userDoc.data();
+    return {
+      ...data,
+      uid: userDoc.id,
+      role: data?.role || "user", // Por defecto es 'user' si no está definido
+    } as UserData;
   } catch (error) {
     console.error("Error al obtener usuario de Firestore:", error);
     throw new Error("Error al obtener la información del usuario");
@@ -103,7 +109,7 @@ export const getUserFromFirestore = async (uid: string): Promise<UserData | null
 /**
  * Obtener información del usuario autenticado (desde Firebase Auth y Firestore)
  */
-export const getUserById = async (uid: string) => {
+export const getUserById = async (uid: string): Promise<UserData> => {
   try {
     if (!firebaseAdmin) {
       throw new Error("Firebase Admin no está inicializado");
@@ -177,6 +183,65 @@ export const updateUserProfile = async (
   } catch (error) {
     console.error("Error al actualizar perfil:", error);
     throw new Error("Error al actualizar el perfil del usuario");
+  }
+};
+
+/**
+ * Listar usuarios con paginación (solo admin)
+ */
+export const getAllUsers = async (
+  pagination?: { page?: number; limit?: number }
+): Promise<{
+  users: UserData[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}> => {
+  try {
+    if (!db) {
+      throw new Error("Firestore no está inicializado");
+    }
+
+    const page = pagination?.page || 1;
+    const limit = Math.min(pagination?.limit || 20, 100);
+    const offset = (page - 1) * limit;
+
+    // Obtener total de usuarios
+    const totalSnapshot = await db.collection(USERS_COLLECTION).count().get();
+    const total = totalSnapshot.data().count;
+
+    // Obtener usuarios con paginación
+    const snapshot = await db
+      .collection(USERS_COLLECTION)
+      .orderBy("createdAt", "desc")
+      .offset(offset)
+      .limit(limit)
+      .get();
+
+    const users: UserData[] = [];
+    for (const doc of snapshot.docs) {
+      const userData = doc.data() as UserData;
+      users.push({
+        ...userData,
+        uid: doc.id,
+      });
+    }
+
+    return {
+      users,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  } catch (error) {
+    console.error("Error al listar usuarios:", error);
+    throw new Error("Error al listar usuarios");
   }
 };
 

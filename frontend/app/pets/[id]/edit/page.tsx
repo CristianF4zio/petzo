@@ -10,9 +10,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PetForm } from "@/components/PetForm";
-import api from "@/lib/api";
+import { getPetById, Pet } from "@/lib/services/pets.service";
 import { useAuth } from "@/contexts/AuthContext";
-import { Pet } from "@/components/PetCard";
 
 export default function EditPetPage() {
   const params = useParams();
@@ -31,21 +30,15 @@ export default function EditPetPage() {
   const fetchPet = async (id: string) => {
     try {
       setLoading(true);
-      const response = await api.get(`/pets/${id}`);
+      const petData = await getPetById(id);
       
-      if (response.data.success) {
-        const petData = response.data.data;
-        
-        // Verificar que el usuario sea el propietario
-        if (user && user.uid !== petData.ownerId) {
-          setError("No tienes permiso para editar esta mascota");
-          return;
-        }
-        
-        setPet(petData);
-      } else {
-        setError("Mascota no encontrada");
+      // Verificar que el usuario sea el propietario
+      if (user && user.uid !== petData.ownerId) {
+        setError("No tienes permiso para editar esta mascota");
+        return;
       }
+      
+      setPet(petData);
     } catch (err: any) {
       console.error("Error al obtener mascota:", err);
       if (err.response?.status === 404) {

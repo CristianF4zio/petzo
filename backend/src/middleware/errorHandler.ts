@@ -4,6 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from "express";
+import logger from "../config/logger";
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -17,11 +18,13 @@ export const errorHandler = (
   next: NextFunction
 ): void => {
   // Log del error para debugging
-  console.error("Error:", {
+  logger.error("Error capturado:", {
     message: err.message,
     stack: err.stack,
     statusCode: err.statusCode,
     code: err.code,
+    path: req.path,
+    method: req.method,
   });
 
   // Determinar el código de estado
