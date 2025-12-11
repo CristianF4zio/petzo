@@ -7,7 +7,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { PetCard } from "@/components/PetCard";
@@ -31,9 +31,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { getPets, Pet, PetsFilters, PaginatedResponse } from "@/lib/services/pets.service";
+import { PetCardGridSkeleton, EmptyState } from "@/components/ui/loading-states";
+import { Search as SearchIcon, Heart } from "lucide-react";
 
 export default function PetsPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,16 +147,20 @@ export default function PetsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
+    <div className="min-h-screen bg-[var(--color-background)] relative">
       <Navbar />
+      
+      {/* Sistema de partículas - Muy visible e interactivo */}
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl lg:text-5xl font-bold text-[var(--color-text-primary)] mb-3">
-            Mascotas en Adopción
+        <div className="mb-12 space-y-3">
+          <h1 className="text-4xl lg:text-6xl font-extrabold text-[var(--color-text-primary)]" style={{ lineHeight: '1.15' }}>
+            <span className="bg-gradient-to-r from-[var(--color-text-primary)] via-[var(--color-text-primary)] to-[var(--color-primary)] bg-clip-text text-transparent inline-block" style={{ paddingBottom: '0.15em', lineHeight: '1.2' }}>
+              Mascotas en Adopción
+            </span>
           </h1>
-          <p className="text-xl text-[var(--color-text-secondary)]">
+          <p className="text-xl lg:text-2xl text-[var(--color-text-secondary)] font-medium">
             Encuentra tu compañero perfecto
           </p>
         </div>
@@ -172,7 +179,7 @@ export default function PetsPage() {
                 className="pl-10"
               />
             </div>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="bone">
               Buscar
             </Button>
             <Dialog open={filtersDialogOpen} onOpenChange={setFiltersDialogOpen}>
@@ -313,10 +320,10 @@ export default function PetsPage() {
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-sm text-[var(--color-text-secondary)]">Filtros activos:</span>
               {filters.type && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 hover:bg-[var(--color-primary)]/20 cursor-pointer group">
                   Tipo: {filters.type === "dog" ? "Perro" : "Gato"}
                   <X
-                    className="w-3 h-3 cursor-pointer"
+                    className="w-3 h-3 cursor-pointer hover:scale-125 transition-transform duration-200 group-hover:text-white"
                     onClick={() => setFilters({ ...filters, type: undefined })}
                   />
                 </Badge>
@@ -373,33 +380,44 @@ export default function PetsPage() {
         </div>
 
         {/* Grid de Mascotas */}
-        <div>
+        <div className="page-transition">
           {loading ? (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">🐾</div>
-              <p className="text-[var(--color-text-secondary)]">Cargando mascotas...</p>
-            </div>
+            <PetCardGridSkeleton count={12} />
           ) : error ? (
-            <div className="text-center py-20 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]">
-              <div className="text-6xl mb-4">😿</div>
-              <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-2">
-                Error al cargar mascotas
-              </h3>
-              <p className="text-[var(--color-text-secondary)] mb-6">{error}</p>
-              <Button onClick={loadPets}>Intentar de nuevo</Button>
+            <div className="bg-[var(--color-surface)] rounded-[var(--radius-xl)] shadow-[var(--shadow-md)] p-8">
+              <EmptyState
+                icon={SearchIcon}
+                title="Error al cargar mascotas"
+                description={error}
+                action={
+                  <Button onClick={loadPets} variant="primary">
+                    Intentar de nuevo
+                  </Button>
+                }
+              />
             </div>
           ) : pets.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)]">
-              <div className="text-6xl mb-4">🐾</div>
-              <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-2">
-                No se encontraron mascotas
-              </h3>
-              <p className="text-[var(--color-text-secondary)] mb-6">
-                Intenta ajustar los filtros para ver más resultados
-              </p>
-              {hasActiveFilters && (
-                <Button onClick={clearFilters}>Limpiar filtros</Button>
-              )}
+            <div className="bg-[var(--color-surface)] rounded-[var(--radius-xl)] shadow-[var(--shadow-md)] p-8">
+              <EmptyState
+                icon={Heart}
+                title="No se encontraron mascotas"
+                description={
+                  hasActiveFilters
+                    ? "Intenta ajustar los filtros para ver más resultados"
+                    : "No hay mascotas disponibles en este momento. ¡Vuelve pronto!"
+                }
+                action={
+                  hasActiveFilters ? (
+                    <Button onClick={clearFilters} variant="outline">
+                      Limpiar filtros
+                    </Button>
+                  ) : (
+                    <Button onClick={() => router.push("/pets/new")} variant="primary">
+                      Publicar una mascota
+                    </Button>
+                  )
+                }
+              />
             </div>
           ) : (
             <>
@@ -442,6 +460,7 @@ export default function PetsPage() {
                     variant="outline"
                     onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                     disabled={!pagination.hasPrev}
+                    className="hover:scale-105 disabled:hover:scale-100"
                   >
                     <ChevronLeft className="w-4 h-4 mr-1" />
                     Anterior
@@ -453,6 +472,7 @@ export default function PetsPage() {
                     variant="outline"
                     onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                     disabled={!pagination.hasNext}
+                    className="hover:scale-105 disabled:hover:scale-100"
                   >
                     Siguiente
                     <ChevronRight className="w-4 h-4 ml-1" />

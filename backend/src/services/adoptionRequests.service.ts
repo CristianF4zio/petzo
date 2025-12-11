@@ -53,7 +53,7 @@ export const createAdoptionRequest = async (
       requesterId,
       ownerId,
       status: "pending" as const,
-      message: message || null,
+      message: message || undefined,
       createdAt: now,
       updatedAt: now,
     };
@@ -65,6 +65,7 @@ export const createAdoptionRequest = async (
     return {
       id: docRef.id,
       ...requestData,
+      message: requestData.message || undefined,
     };
   } catch (error: any) {
     console.error("Error al crear solicitud de adopción:", error);

@@ -8,8 +8,7 @@
 import { useState, FormEvent } from "react";
 import { UploadButton } from "./UploadButton";
 import { useRouter } from "next/navigation";
-import { Pet } from "./PetCard";
-import { createPet, updatePet, Pet as BackendPet } from "@/lib/services/pets.service";
+import { createPet, updatePet, Pet } from "@/lib/services/pets.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

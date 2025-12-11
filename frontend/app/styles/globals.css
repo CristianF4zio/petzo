@@ -4,22 +4,22 @@
 
 @layer base {
   :root {
-    /* Colores principales */
-    --color-primary: #FF6B6B;
-    --color-secondary: #4ECDC4;
-    --color-accent: #FFE66D;
-    --color-tertiary: #A8DADC;
+    /* Colores principales - Modo Claro (Adopción de Mascotas) */
+    --color-primary: #FF6B35; /* Naranja cálido - para botones principales y acciones */
+    --color-secondary: #45B7B8; /* Azul turquesa - para fondos y elementos secundarios */
+    --color-accent: #FF6B35; /* Naranja cálido - para acentos y hovers */
+    --color-tertiary: #45B7B8; /* Azul turquesa - para elementos terciarios */
     --color-white: #FFFFFF;
     
-    /* Fondos */
-    --color-background: #FFFDF7;
-    --color-surface: #FFF9F0;
-    --color-border: #FFE4E1;
+    /* Fondos - Modo Claro */
+    --color-background: #F8F9FA; /* Gris muy claro y limpio */
+    --color-surface: #FFFFFF; /* Blanco puro */
+    --color-border: #E0E0E0; /* Gris muy claro */
     
-    /* Textos */
-    --color-text-primary: #2D3436;
-    --color-text-secondary: #636E72;
-    --color-text-muted: #B2BEC3;
+    /* Textos - Modo Claro */
+    --color-text-primary: #2C3E50; /* Azul oscuro - profesional y legible */
+    --color-text-secondary: #5A6C7D; /* Gris azulado medio */
+    --color-text-muted: #95A5A6; /* Gris claro */
     
     /* Border Radius */
     --radius-sm: 0.5rem;
@@ -28,7 +28,7 @@
     --radius-xl: 1.5rem;
     --radius-full: 9999px;
     
-    /* Sombras */
+    /* Sombras - Modo Claro */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -39,6 +39,30 @@
     --transition-300: 300ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-500: 500ms cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  .dark {
+    /* Colores principales - Modo Oscuro (Adopción de Mascotas) */
+    --color-primary: #FF8C5A; /* Naranja más claro - para botones principales */
+    --color-secondary: #5BC5C6; /* Azul turquesa - para fondos y elementos secundarios */
+    --color-accent: #FF8C5A; /* Naranja más claro - para acentos y hovers */
+    --color-tertiary: #5BC5C6; /* Azul turquesa - para elementos terciarios */
+    
+    /* Fondos - Modo Oscuro */
+    --color-background: #1A1F2E; /* Azul oscuro profundo */
+    --color-surface: #252B3B; /* Azul grisáceo oscuro */
+    --color-border: #3A4150; /* Gris azulado medio oscuro */
+    
+    /* Textos - Modo Oscuro */
+    --color-text-primary: #E8F4F8; /* Blanco azulado muy claro */
+    --color-text-secondary: #B8C5D1; /* Gris azulado claro */
+    --color-text-muted: #7A8A9A; /* Gris azulado medio */
+    
+    /* Sombras - Modo Oscuro */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+  }
   
   body {
     @apply bg-[var(--color-background)] text-[var(--color-text-primary)];
@@ -46,6 +70,31 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+  }
+
+  /* Efectos hover globales para elementos seleccionables */
+  a, button, [role="button"], [tabindex="0"] {
+    @apply transition-all duration-200;
+  }
+
+  /* Links con hover mejorado */
+  a:not(.no-hover):hover {
+    @apply transition-all duration-200;
+  }
+
+  /* Cards y elementos interactivos */
+  [class*="card"], [class*="Card"] {
+    @apply transition-all duration-300;
+  }
+
+  /* Botones con hover mejorado */
+  button:not(:disabled):hover {
+    @apply transition-all duration-200;
+  }
+
+  /* Elementos seleccionables con cursor pointer */
+  [class*="cursor-pointer"], [class*="hover"] {
+    @apply transition-all duration-200;
   }
   
   h1 {
@@ -92,10 +141,378 @@
       @apply text-2xl;
     }
   }
+
+  /* Mejoras para mobile */
+  @media (max-width: 640px) {
+    /* Mejorar espaciado en mobile */
+    .container-mobile {
+      @apply px-4;
+    }
+
+    /* Botones más grandes en mobile para mejor accesibilidad */
+    button, .btn {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Mejorar legibilidad del texto */
+    p {
+      @apply text-base leading-relaxed;
+    }
+  }
+
+  /* Mejoras de accesibilidad táctil */
+  @media (hover: none) and (pointer: coarse) {
+    /* Aumentar área táctil en dispositivos móviles */
+    a, button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Animaciones personalizadas */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  /* Animaciones temáticas profesionales y sutiles */
+  @keyframes float-bone {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 0.08;
+    }
+    50% {
+      transform: translateY(-8px) rotate(5deg);
+      opacity: 0.15;
+    }
+  }
+
+  @keyframes paw-print {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.2;
+    }
+  }
+
+  @keyframes float-heart {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+      opacity: 0.1;
+    }
+    50% {
+      transform: translateY(-6px) scale(1.02);
+      opacity: 0.18;
+    }
+  }
+
+  @keyframes bone-fall {
+    0% {
+      transform: translateY(-10px) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.4;
+    }
+    100% {
+      transform: translateY(100vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes walk-paw {
+    0%, 100% {
+      transform: translateX(0);
+      opacity: 0.08;
+    }
+    50% {
+      transform: translateX(4px);
+      opacity: 0.15;
+    }
+  }
+
+  @keyframes bounce-bone {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-3px) rotate(5deg);
+    }
+  }
+
+  @keyframes wag-tail {
+    0%, 100% {
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(8deg);
+    }
+  }
+
+  @keyframes pet-jump {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-4px) scale(1.02);
+    }
+  }
+
+  @keyframes subtle-glow {
+    0%, 100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-8px) rotate(5deg);
+    }
+    75% {
+      transform: translateY(-4px) rotate(-5deg);
+    }
+  }
+
+  .animate-float-particle {
+    animation: float-particle 3s ease-in-out infinite;
+  }
+
+  /* Forma de hueso para botones - Diseño profesional y realista */
+  .bone-button-shape {
+    position: relative;
+    /* Forma de hueso usando border-radius con valores diferentes para crear la forma característica */
+    border-radius: 50px 15px 50px 15px / 50px 15px 50px 15px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    overflow: visible;
+    /* Sombra externa solamente */
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+      0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Efecto de brillo interno en el centro del hueso - REMOVIDO */
+  .bone-button-shape::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 15%;
+    width: 70%;
+    height: 40%;
+    border-radius: 50px;
+    background: transparent;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  .bone-button-shape:hover::before {
+    opacity: 0;
+  }
+
+  /* Efecto de profundidad en los extremos del hueso - REMOVIDO */
+  .bone-button-shape::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: transparent;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Animación sutil de pulso para botones de hueso */
+  @keyframes bone-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  .bone-button-shape:hover {
+    animation: bone-pulse 2s ease-in-out infinite;
+    box-shadow: 
+      0 10px 15px -3px rgba(0, 0, 0, 0.15), 
+      0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Ajustes para diferentes tamaños */
+  .bone-button-shape.size-sm {
+    border-radius: 40px 10px 40px 10px / 40px 10px 40px 10px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .bone-button-shape.size-lg {
+    border-radius: 60px 18px 60px 18px / 60px 18px 60px 18px;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+
+  /* Clases de animación profesionales y sutiles */
+  .animate-float-bone {
+    animation: float-bone 4s ease-in-out infinite;
+  }
+
+  .animate-paw-print {
+    animation: paw-print 5s ease-in-out infinite;
+  }
+
+  .animate-float-heart {
+    animation: float-heart 3s ease-in-out infinite;
+  }
+
+  .animate-bone-fall {
+    animation: bone-fall 2s linear;
+  }
+
+  .animate-walk-paw {
+    animation: walk-paw 3s ease-in-out infinite;
+  }
+
+  .animate-bounce-bone {
+    animation: bounce-bone 1.5s ease-in-out;
+  }
+
+  .animate-wag-tail {
+    animation: wag-tail 0.8s ease-in-out infinite;
+  }
+
+  .animate-pet-jump {
+    animation: pet-jump 0.8s ease-in-out;
+  }
+
+  .animate-subtle-glow {
+    animation: subtle-glow 2s ease-in-out infinite;
+  }
+
+  /* Efectos hover profesionales y sutiles */
+  .hover-bone:hover {
+    transform: rotate(2deg) scale(1.02);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-paw:hover {
+    transform: scale(1.03);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-wag:hover {
+    animation: wag-tail 0.8s ease-in-out infinite;
+  }
+
+  /* Transiciones suaves para modo oscuro */
+  * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  /* Transiciones suaves para páginas */
+  .page-transition {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  /* Efectos hover mejorados */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hover-glow {
+    transition: box-shadow 0.3s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Mejoras de accesibilidad */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

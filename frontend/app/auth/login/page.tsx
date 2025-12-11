@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PawPrint, Mail, Lock } from "lucide-react";
@@ -27,8 +27,13 @@ export default function LoginPage() {
   const { user } = useAuth();
 
   // Si ya está autenticado, redirigir al dashboard
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
   if (user) {
-    router.push("/dashboard");
     return null;
   }
 
@@ -66,38 +71,38 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
       {/* Lado Izquierdo - Imagen y texto motivacional */}
-      <div className="hidden lg:flex relative bg-gradient-to-br from-[var(--color-primary)] via-[#ff8787] to-[var(--color-secondary)] p-12 flex-col justify-between">
+      <div className="hidden lg:flex relative bg-gradient-to-br from-[var(--color-surface)] via-[var(--color-background)] to-[var(--color-surface)] p-12 flex-col justify-between border-r border-[var(--color-border)]">
         <div>
           <div className="flex items-center gap-3 mb-8">
-            <div className="flex items-center justify-center w-12 h-12 rounded-[var(--radius-md)] bg-white/20 backdrop-blur-sm">
-              <PawPrint className="w-7 h-7 text-white" />
+            <div className="flex items-center justify-center w-12 h-12 rounded-[var(--radius-md)] bg-[var(--color-primary)]/20 backdrop-blur-sm">
+              <PawPrint className="w-7 h-7 text-[var(--color-primary)]" />
             </div>
-            <span className="text-3xl font-bold text-white">PETZO</span>
+            <span className="text-3xl font-bold text-[var(--color-text-primary)]">PETZO</span>
           </div>
 
-          <h2 className="text-4xl font-bold text-white mb-4 leading-tight">
+          <h2 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4 leading-tight">
             Conectando mascotas con familias amorosas
           </h2>
-          <p className="text-xl text-white/90">
+          <p className="text-xl text-[var(--color-text-secondary)]">
             Miles de mascotas han encontrado su hogar perfecto gracias a nuestra
             comunidad. ¡Únete hoy!
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white/10 backdrop-blur-sm rounded-[var(--radius-lg)] p-6">
-            <div className="text-4xl font-bold text-white mb-2">1,000+</div>
-            <p className="text-white/90">Adopciones exitosas</p>
+          <div className="bg-[var(--color-primary)]/10 backdrop-blur-sm rounded-[var(--radius-lg)] p-6 border border-[var(--color-border)]">
+            <div className="text-4xl font-bold text-[var(--color-text-primary)] mb-2">1,000+</div>
+            <p className="text-[var(--color-text-secondary)]">Adopciones exitosas</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-[var(--radius-lg)] p-6">
-            <div className="text-4xl font-bold text-white mb-2">500+</div>
-            <p className="text-white/90">Refugios asociados</p>
+          <div className="bg-[var(--color-primary)]/10 backdrop-blur-sm rounded-[var(--radius-lg)] p-6 border border-[var(--color-border)]">
+            <div className="text-4xl font-bold text-[var(--color-text-primary)] mb-2">500+</div>
+            <p className="text-[var(--color-text-secondary)]">Refugios asociados</p>
           </div>
         </div>
 
         {/* Elementos decorativos */}
-        <div className="absolute top-20 right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-[var(--color-accent)]/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 right-20 w-64 h-64 bg-[var(--color-accent)]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-[var(--color-tertiary)]/5 rounded-full blur-3xl"></div>
       </div>
 
       {/* Lado Derecho - Formulario */}

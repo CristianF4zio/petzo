@@ -12,9 +12,9 @@ import { MessageCircle, Plus, Search, Clock } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -25,6 +25,7 @@ import {
 import { getUnreadMessages } from "@/lib/services/messages.service";
 import { getUserById } from "@/lib/services/users.service";
 import { getPetById } from "@/lib/services/pets.service";
+import { ConversationSkeleton, EmptyState } from "@/components/ui/loading-states";
 
 interface ConversationWithDetails extends Conversation {
   otherParticipant?: {
@@ -83,8 +84,8 @@ function MessagesContent() {
             try {
               const otherUser = await getUserById(otherParticipantId);
               enriched.otherParticipant = {
-                id: otherUser.id,
-                name: otherUser.name || otherUser.email || "Usuario",
+                id: otherUser.uid,
+                name: otherUser.name || otherUser.displayName || otherUser.email || "Usuario",
                 photoURL: otherUser.photoURL,
               };
             } catch (err) {
@@ -168,8 +169,10 @@ function MessagesContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
+    <div className="min-h-screen bg-[var(--color-background)] relative">
       <Navbar />
+      
+      {/* Sistema de partículas - Interactivo */}
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         {/* Header */}
@@ -202,35 +205,49 @@ function MessagesContent() {
 
         {/* Lista de conversaciones */}
         {loading ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">💬</div>
-            <p className="text-[var(--color-text-secondary)]">Cargando conversaciones...</p>
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <ConversationSkeleton key={i} />
+            ))}
           </div>
         ) : error ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <div className="text-6xl mb-4">😿</div>
-              <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-2">
-                Error al cargar conversaciones
-              </h3>
-              <p className="text-[var(--color-text-secondary)] mb-6">{error}</p>
-              <Button onClick={loadConversations}>Intentar de nuevo</Button>
+          <Card className="animate-fade-in">
+            <CardContent className="p-12">
+              <EmptyState
+                icon={MessageCircle}
+                title="Error al cargar conversaciones"
+                description={error}
+                action={
+                  <Button onClick={loadConversations} variant="primary">
+                    Intentar de nuevo
+                  </Button>
+                }
+              />
             </CardContent>
           </Card>
         ) : filteredConversations.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <div className="text-6xl mb-4">💬</div>
-              <h3 className="text-2xl font-semibold text-[var(--color-text-primary)] mb-2">
-                {searchQuery.trim()
-                  ? "No se encontraron conversaciones"
-                  : "No tienes conversaciones aún"}
-              </h3>
-              <p className="text-[var(--color-text-secondary)] mb-6">
-                {searchQuery.trim()
-                  ? "Intenta con otros términos de búsqueda"
-                  : "Inicia una conversación desde el perfil de una mascota"}
-              </p>
+          <Card className="animate-fade-in">
+            <CardContent className="p-12">
+              <EmptyState
+                icon={MessageCircle}
+                title={
+                  searchQuery.trim()
+                    ? "No se encontraron conversaciones"
+                    : "No tienes conversaciones aún"
+                }
+                description={
+                  searchQuery.trim()
+                    ? "Intenta con otros términos de búsqueda"
+                    : "Inicia una conversación desde el perfil de una mascota"
+                }
+                action={
+                  searchQuery.trim() ? null : (
+                    <Button onClick={() => router.push("/pets")} variant="primary">
+                      Ver mascotas
+                    </Button>
+                  )
+                }
+              />
             </CardContent>
           </Card>
         ) : (
@@ -238,8 +255,8 @@ function MessagesContent() {
             {filteredConversations.map((conv) => {
               const unread = getUnreadCountForConversation(conv);
               return (
-                <Link key={conv.id} href={`/messages/${conv.id}`}>
-                  <Card className="hover:shadow-lg transition-all cursor-pointer">
+                <Link key={conv.id} href={`/messages/${conv.id}`} className="animate-fade-in block group">
+                  <Card className="hover-lift cursor-pointer border border-[var(--color-border)]/50 hover:border-[var(--color-primary)]/50 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1 rounded-2xl">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
                         {/* Avatar */}
@@ -275,7 +292,7 @@ function MessagesContent() {
                                 </span>
                               )}
                               {unread > 0 && (
-                                <Badge className="bg-[var(--color-primary)] text-white">
+                                <Badge variant="default" className="bg-[var(--color-primary)] text-white">
                                   {unread > 9 ? "9+" : unread}
                                 </Badge>
                               )}

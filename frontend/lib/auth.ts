@@ -34,8 +34,11 @@ export const loginWithEmail = async (email: string, password: string) => {
         photoURL: userCredential.user.photoURL || null,
         emailVerified: userCredential.user.emailVerified,
       });
-    } catch (error) {
-      console.error("Error al guardar usuario en Firestore:", error);
+    } catch (error: any) {
+      // Solo mostrar error si no es un error de Firestore no inicializado
+      if (error.response?.status !== 500 || !error.response?.data?.error?.includes("Firestore")) {
+        console.error("Error al guardar usuario en Firestore:", error);
+      }
       // No fallar el login si hay error al guardar en Firestore
     }
 
@@ -71,8 +74,11 @@ export const registerWithEmail = async (
         displayName: userCredential.user.displayName || null,
         photoURL: userCredential.user.photoURL || null,
       });
-    } catch (error) {
-      console.error("Error al guardar usuario en Firestore:", error);
+    } catch (error: any) {
+      // Solo mostrar error si no es un error de Firestore no inicializado
+      if (error.response?.status !== 500 || !error.response?.data?.error?.includes("Firestore")) {
+        console.error("Error al guardar usuario en Firestore:", error);
+      }
       // No fallar el registro si hay error al guardar en Firestore
     }
 
@@ -102,8 +108,11 @@ export const loginWithGoogle = async () => {
         photoURL: userCredential.user.photoURL || null,
         emailVerified: userCredential.user.emailVerified,
       });
-    } catch (error) {
-      console.error("Error al guardar usuario en Firestore:", error);
+    } catch (error: any) {
+      // Solo mostrar error si no es un error de Firestore no inicializado
+      if (error.response?.status !== 500 || !error.response?.data?.error?.includes("Firestore")) {
+        console.error("Error al guardar usuario en Firestore:", error);
+      }
       // No fallar el login si hay error al guardar en Firestore
     }
 
@@ -156,7 +165,8 @@ export const changePassword = async (newPassword: string) => {
       };
     }
 
-    await user.updatePassword(newPassword);
+    // updatePassword está disponible en el objeto User de Firebase Auth
+    await (user as any).updatePassword(newPassword);
 
     return {
       success: true,

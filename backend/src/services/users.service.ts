@@ -53,8 +53,8 @@ export const createOrUpdateUser = async (userData: {
     const userInfo: Partial<UserData> = {
       uid: userData.uid,
       email: userData.email,
-      displayName: userData.displayName || null,
-      photoURL: userData.photoURL || null,
+      displayName: userData.displayName || undefined,
+      photoURL: userData.photoURL || undefined,
       emailVerified: userData.emailVerified || false,
       updatedAt: now,
     };
@@ -129,15 +129,15 @@ export const getUserById = async (uid: string): Promise<UserData> => {
     // Combinar datos de Auth y Firestore
     return {
       uid: userRecord.uid,
-      email: userRecord.email,
+      email: userRecord.email || "",
       displayName: firestoreUser?.displayName || userRecord.displayName,
       photoURL: firestoreUser?.photoURL || userRecord.photoURL,
       emailVerified: userRecord.emailVerified,
       phone: firestoreUser?.phone,
       city: firestoreUser?.city,
       bio: firestoreUser?.bio,
-      createdAt: firestoreUser?.createdAt,
-      updatedAt: firestoreUser?.updatedAt,
+      createdAt: firestoreUser?.createdAt || Date.now(),
+      updatedAt: firestoreUser?.updatedAt || Date.now(),
     };
   } catch (error) {
     console.error("Error al obtener usuario:", error);

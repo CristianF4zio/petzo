@@ -8,17 +8,19 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { PawPrint, Menu, X, MessageCircle } from "lucide-react";
+import { PawPrint, Menu, X, MessageCircle, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { logout } from "@/lib/auth";
 import { getUnreadMessages } from "@/lib/services/messages.service";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTheme } from "@/components/ui/theme-provider";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,15 +61,15 @@ export const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-[var(--color-border)] shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <nav className="sticky top-0 z-50 bg-[var(--color-surface)] border-b border-[var(--color-border)] shadow-sm backdrop-blur-sm bg-opacity-95" suppressHydrationWarning>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8" suppressHydrationWarning>
+        <div className="flex justify-between items-center h-20" suppressHydrationWarning>
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3" onClick={closeMobileMenu}>
-            <div className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)] bg-[var(--color-primary)]">
-              <PawPrint className="w-6 h-6 text-white" />
+          <Link href="/" className="flex items-center gap-3 group/logo transition-all duration-200 hover:scale-105" onClick={closeMobileMenu}>
+            <div className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)] bg-[var(--color-primary)] group-hover/logo:bg-[var(--color-primary)]/90 transition-all duration-200 shadow-md group-hover/logo:shadow-lg" suppressHydrationWarning>
+              <PawPrint className="w-6 h-6 text-white group-hover/logo:scale-110 transition-transform duration-200" />
             </div>
-            <span className="text-2xl font-bold text-[var(--color-primary)]">
+            <span className="text-2xl font-bold text-[var(--color-primary)] group-hover/logo:text-[var(--color-primary)]/90 transition-colors duration-200">
               PETZO
             </span>
           </Link>
@@ -81,20 +83,39 @@ export const Navbar = () => {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "text-base font-medium transition-colors duration-200",
+                    "text-base font-medium transition-all duration-200 relative",
+                    "hover:scale-105 hover:font-semibold",
                     pathname === link.href
-                      ? "text-[var(--color-primary)]"
+                      ? "text-[var(--color-primary)] font-semibold"
                       : "text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
                   )}
                 >
                   {link.label}
+                  {pathname === link.href && (
+                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[var(--color-primary)] rounded-full"></span>
+                  )}
                 </Link>
               );
             })}
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
+            {/* Toggle Theme */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="h-9 w-9 p-0"
+              aria-label="Cambiar tema"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+            </Button>
+
             {user ? (
               <>
                 <Link href="/messages" className="relative">
@@ -103,9 +124,9 @@ export const Navbar = () => {
                     Mensajes
                   </Button>
                   {unreadMessagesCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <Badge className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold p-0 border-0">
                       {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
-                    </span>
+                    </Badge>
                   )}
                 </Link>
                 <Link href="/dashboard">
@@ -141,8 +162,9 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
+            className="md:hidden p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menú móvil"
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -154,8 +176,8 @@ export const Navbar = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[var(--color-border)] py-4">
-            <div className="flex flex-col gap-4">
+          <div className="md:hidden border-t border-[var(--color-border)] py-4" suppressHydrationWarning>
+            <div className="flex flex-col gap-4" suppressHydrationWarning>
               {navLinks.map((link) => {
                 if (link.authRequired && !user) return null;
                 return (
@@ -176,6 +198,26 @@ export const Navbar = () => {
               })}
 
               <div className="border-t border-[var(--color-border)] pt-4 flex flex-col gap-3">
+                {/* Toggle Theme Mobile */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="w-full justify-start"
+                >
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="w-4 h-4 mr-2" />
+                      Modo Claro
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="w-4 h-4 mr-2" />
+                      Modo Oscuro
+                    </>
+                  )}
+                </Button>
+
                 {user ? (
                   <>
                     <Link href="/messages" onClick={closeMobileMenu} className="relative">
@@ -183,7 +225,7 @@ export const Navbar = () => {
                         <MessageCircle className="w-4 h-4 mr-2" />
                         Mensajes
                         {unreadMessagesCount > 0 && (
-                          <Badge className="ml-2 bg-red-500 text-white">
+                          <Badge className="ml-2 bg-[var(--color-primary)] text-white">
                             {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
                           </Badge>
                         )}

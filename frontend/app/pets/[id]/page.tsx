@@ -18,7 +18,10 @@ import {
   X,
   Edit,
   MessageCircle,
+  Bone,
+  PawPrint,
 } from "lucide-react";
+import { BoneRain } from "@/components/ui/pet-decorations";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +59,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Lightbox } from "@/components/ui/lightbox";
+import { PetDetailSkeleton } from "@/components/ui/loading-states";
 
 export default function PetDetailPage() {
   const params = useParams();
@@ -75,6 +80,8 @@ export default function PetDetailPage() {
   const [reportDescription, setReportDescription] = useState("");
   const [submittingReport, setSubmittingReport] = useState(false);
   const [startingConversation, setStartingConversation] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showBoneRain, setShowBoneRain] = useState(false);
 
   useEffect(() => {
     loadPet();
@@ -132,6 +139,9 @@ export default function PetDetailPage() {
       } else {
         await addFavorite(pet.id);
         setFavoriteStatus(true);
+        // Efecto de celebración al agregar a favoritos
+        setShowBoneRain(true);
+        setTimeout(() => setShowBoneRain(false), 2000);
       }
     } catch (err: any) {
       console.error("Error al actualizar favorito:", err);
@@ -220,31 +230,65 @@ export default function PetDetailPage() {
     female: "hembra",
   };
 
-  return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      <Navbar />
+  const handleNextImage = () => {
+    setSelectedImage((prev) => (prev + 1) % petImages.length);
+  };
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+  const handlePrevImage = () => {
+    setSelectedImage((prev) => (prev - 1 + petImages.length) % petImages.length);
+  };
+
+  return (
+    <div className="min-h-screen bg-[var(--color-background)] relative">
+      <Navbar />
+      
+      {/* Partículas de fondo - Muy visibles e interactivas */}
+      
+      {/* Efecto de lluvia de huesitos */}
+      <BoneRain active={showBoneRain} />
+      
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <Lightbox
+          images={petImages}
+          currentIndex={selectedImage}
+          onClose={() => setLightboxOpen(false)}
+          onNext={handleNextImage}
+          onPrev={handlePrevImage}
+        />
+      )}
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         {/* Botón volver */}
         <Link
           href="/pets"
-          className="inline-flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-all duration-300 mb-8 font-medium hover:gap-3 group"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
           Volver al listado
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 animate-fade-in">
           {/* Galería de Imágenes */}
           <div className="space-y-4">
             {/* Imagen principal */}
-            <div className="relative aspect-[4/3] rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-lg)]">
+            <button
+              onClick={() => setLightboxOpen(true)}
+              className="relative aspect-[4/3] rounded-[var(--radius-xl)] overflow-hidden shadow-[var(--shadow-lg)] group cursor-pointer hover-lift"
+            >
               <ImageWithFallback
                 src={petImages[selectedImage] || pet.photoUrl}
                 alt={`${pet.name} - Imagen ${selectedImage + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="eager"
               />
-            </div>
+              {/* Overlay para indicar que es clickeable */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium bg-black/50 px-4 py-2 rounded-full">
+                  Click para ampliar
+                </span>
+              </div>
+            </button>
 
             {/* Miniaturas */}
             {petImages.length > 1 && (
@@ -253,9 +297,9 @@ export default function PetDetailPage() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative aspect-square rounded-[var(--radius-md)] overflow-hidden border-2 transition-all ${
+                    className={`relative aspect-square rounded-[var(--radius-md)] overflow-hidden border-2 transition-all hover-lift ${
                       selectedImage === index
-                        ? "border-[var(--color-primary)] shadow-md"
+                        ? "border-[var(--color-primary)] shadow-md scale-105"
                         : "border-transparent hover:border-[var(--color-border)]"
                     }`}
                   >
@@ -263,6 +307,7 @@ export default function PetDetailPage() {
                       src={image}
                       alt={`${pet.name} - Miniatura ${index + 1}`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </button>
                 ))}
@@ -285,16 +330,19 @@ export default function PetDetailPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-10 w-10 p-0"
+                      className="h-10 w-10 p-0 relative group/fav hover-paw"
                       onClick={handleToggleFavorite}
                     >
                       <Heart
-                        className={`w-5 h-5 ${
+                        className={`w-5 h-5 transition-all duration-300 ${
                           favoriteStatus
-                            ? "fill-[var(--color-primary)] text-[var(--color-primary)]"
-                            : ""
+                            ? "fill-[var(--color-primary)] text-[var(--color-primary)] animate-pet-jump"
+                            : "group-hover/fav:scale-110"
                         }`}
                       />
+                      {favoriteStatus && (
+                        <Bone className="absolute -top-1 -right-1 w-3 h-3 text-[var(--color-accent)] animate-bounce-bone" />
+                      )}
                     </Button>
                     <Button
                       variant="ghost"
@@ -326,8 +374,8 @@ export default function PetDetailPage() {
                 </div>
 
                 <Badge
-                  variant="secondary"
-                  className="w-fit bg-[var(--color-accent)] text-[var(--color-text-primary)]"
+                  variant="default"
+                  className="w-fit hover:scale-105 cursor-default"
                 >
                   {pet.status === "available" && "✅ Disponible para adopción"}
                   {pet.status === "pending" && "⏳ Reservado"}
@@ -392,14 +440,19 @@ export default function PetDetailPage() {
                     <Dialog open={adoptionDialogOpen} onOpenChange={setAdoptionDialogOpen}>
                       <DialogTrigger asChild>
                         <Button
-                          variant="primary"
+                          variant="bone"
                           size="lg"
-                          className="w-full"
+                          className="w-full relative group/btn"
                           disabled={pet.status !== "available"}
                         >
-                          {pet.status === "available"
-                            ? "Solicitar Adopción"
-                            : "No disponible"}
+                          {pet.status === "available" ? (
+                            <>
+                              <Bone className="w-5 h-5 mr-2 group-hover/btn:animate-bounce-bone inline-block" />
+                              Solicitar Adopción
+                            </>
+                          ) : (
+                            "No disponible"
+                          )}
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
@@ -434,7 +487,7 @@ export default function PetDetailPage() {
                           Cancelar
                         </Button>
                         <Button
-                          variant="primary"
+                          variant="bone"
                           onClick={handleAdoptionRequest}
                           disabled={submittingAdoption}
                         >
@@ -448,7 +501,7 @@ export default function PetDetailPage() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full"
+                    className="w-full relative group/msg"
                     onClick={async () => {
                       if (!user) {
                         router.push("/auth/login");
@@ -477,7 +530,14 @@ export default function PetDetailPage() {
                     disabled={startingConversation}
                   >
                     <MessageCircle className="w-5 h-5 mr-2" />
-                    {startingConversation ? "Iniciando..." : "Enviar Mensaje"}
+                    {startingConversation ? (
+                      "Iniciando..."
+                    ) : (
+                      <>
+                        <PawPrint className="w-4 h-4 mr-2 group-hover/msg:animate-bounce-bone inline-block" />
+                        Enviar Mensaje
+                      </>
+                    )}
                   </Button>
                   </div>
                 )}

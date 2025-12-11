@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PawPrint, Mail, Lock, User } from "lucide-react";
@@ -29,8 +29,13 @@ export default function RegisterPage() {
   const { user } = useAuth();
 
   // Si ya está autenticado, redirigir al dashboard
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
   if (user) {
-    router.push("/dashboard");
     return null;
   }
 
@@ -85,61 +90,61 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
       {/* Lado Izquierdo - Imagen y texto motivacional */}
-      <div className="hidden lg:flex relative bg-gradient-to-br from-[var(--color-secondary)] via-[var(--color-tertiary)] to-[var(--color-accent)] p-12 flex-col justify-between">
+      <div className="hidden lg:flex relative bg-gradient-to-br from-[var(--color-surface)] via-[var(--color-background)] to-[var(--color-surface)] p-12 flex-col justify-between border-r border-[var(--color-border)]">
         <div>
           <div className="flex items-center gap-3 mb-8">
-            <div className="flex items-center justify-center w-12 h-12 rounded-[var(--radius-md)] bg-white/20 backdrop-blur-sm">
-              <PawPrint className="w-7 h-7 text-white" />
+            <div className="flex items-center justify-center w-12 h-12 rounded-[var(--radius-md)] bg-[var(--color-primary)]/20 backdrop-blur-sm">
+              <PawPrint className="w-7 h-7 text-[var(--color-primary)]" />
             </div>
-            <span className="text-3xl font-bold text-white">PETZO</span>
+            <span className="text-3xl font-bold text-[var(--color-text-primary)]">PETZO</span>
           </div>
 
-          <h2 className="text-4xl font-bold text-white mb-4 leading-tight">
+          <h2 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4 leading-tight">
             Únete a nuestra comunidad
           </h2>
-          <p className="text-xl text-white/90 mb-8">
+          <p className="text-xl text-[var(--color-text-secondary)] mb-8">
             Forma parte de una red de amantes de los animales que están cambiando
             vidas, una adopción a la vez.
           </p>
 
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-bold border border-[var(--color-primary)]/30">
                 ✓
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">
+                <h3 className="font-semibold text-[var(--color-text-primary)] mb-1">
                   Publica mascotas en adopción
                 </h3>
-                <p className="text-white/80 text-sm">
+                <p className="text-[var(--color-text-secondary)] text-sm">
                   Ayuda a encontrar hogares amorosos para mascotas necesitadas
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-bold border border-[var(--color-primary)]/30">
                 ✓
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">
+                <h3 className="font-semibold text-[var(--color-text-primary)] mb-1">
                   Guarda tus favoritos
                 </h3>
-                <p className="text-white/80 text-sm">
+                <p className="text-[var(--color-text-secondary)] text-sm">
                   Crea tu lista de mascotas favoritas y recibe actualizaciones
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-bold border border-[var(--color-primary)]/30">
                 ✓
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">
+                <h3 className="font-semibold text-[var(--color-text-primary)] mb-1">
                   Conecta con refugios
                 </h3>
-                <p className="text-white/80 text-sm">
+                <p className="text-[var(--color-text-secondary)] text-sm">
                   Acceso directo a refugios verificados en toda España
                 </p>
               </div>
@@ -148,8 +153,8 @@ export default function RegisterPage() {
         </div>
 
         {/* Elementos decorativos */}
-        <div className="absolute top-20 right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 right-20 w-64 h-64 bg-[var(--color-accent)]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-[var(--color-tertiary)]/5 rounded-full blur-3xl"></div>
       </div>
 
       {/* Lado Derecho - Formulario */}
@@ -158,7 +163,7 @@ export default function RegisterPage() {
           {/* Logo móvil */}
           <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
             <div className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)] bg-[var(--color-primary)]">
-              <PawPrint className="w-6 h-6 text-white" />
+              <PawPrint className="w-6 h-6 text-[var(--color-background)]" />
             </div>
             <span className="text-2xl font-bold text-[var(--color-primary)]">
               PETZO

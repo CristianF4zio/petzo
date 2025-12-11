@@ -344,17 +344,24 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
+    <div className="min-h-screen bg-[var(--color-background)] relative">
       <Navbar />
+      
+      {/* Sistema de partículas - Interactivo */}
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         {/* Header */}
-        <div className="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-[var(--color-text-primary)] mb-2">
-              Mi Dashboard
+        <div className="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <Badge variant="secondary" className="text-sm px-4 py-1.5">
+              Panel de Control
+            </Badge>
+            <h1 className="text-4xl lg:text-6xl font-extrabold text-[var(--color-text-primary)]" style={{ lineHeight: '1.15' }}>
+              <span className="bg-gradient-to-r from-[var(--color-text-primary)] via-[var(--color-text-primary)] to-[var(--color-primary)] bg-clip-text text-transparent inline-block" style={{ paddingBottom: '0.15em', lineHeight: '1.2' }}>
+                Mi Dashboard
+              </span>
             </h1>
-            <p className="text-xl text-[var(--color-text-secondary)]">
+            <p className="text-xl lg:text-2xl text-[var(--color-text-secondary)] font-medium">
               Gestiona tus publicaciones y favoritos
             </p>
           </div>
@@ -367,21 +374,21 @@ function DashboardContent() {
         </div>
 
         {/* Tarjeta de Usuario */}
-        <Card className="mb-8 bg-gradient-to-r from-[var(--color-primary)] to-[#ff8787] border-none text-white">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20 border-4 border-white/30">
+        <Card className="mb-10 bg-gradient-to-br from-[var(--color-surface)] via-[var(--color-surface)] to-[var(--color-background)] border-2 border-[var(--color-border)]/50 rounded-2xl">
+          <CardContent className="p-10">
+            <div className="flex items-center gap-6">
+              <Avatar className="h-24 w-24 border-4 border-[var(--color-primary)]/40 shadow-xl">
                 <AvatarImage src={user?.photoURL || undefined} />
-                <AvatarFallback className="bg-white text-[var(--color-primary)] text-2xl">
+                <AvatarFallback className="bg-[var(--color-primary)] text-[var(--color-background)] text-2xl">
                   {user?.email?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="text-2xl font-bold mb-1">
+                <h2 className="text-2xl font-bold mb-1 text-[var(--color-text-primary)]">
                   {user?.displayName || "Usuario PETZO"}
                 </h2>
-                <p className="text-white/90">{user?.email}</p>
-                <Badge className="mt-2 bg-white/20 hover:bg-white/30 border-none">
+                <p className="text-[var(--color-text-secondary)]">{user?.email}</p>
+                <Badge variant="secondary" className="mt-2">
                   Miembro activo
                 </Badge>
               </div>
@@ -390,58 +397,58 @@ function DashboardContent() {
         </Card>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-primary)]/10 mx-auto mb-3">
-                <Edit className="w-6 h-6 text-[var(--color-primary)]" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <Card className="border border-[var(--color-border)]/50 rounded-2xl">
+            <CardContent className="p-8 text-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/10 shadow-lg mx-auto mb-4">
+                <Edit className="w-8 h-8 text-[var(--color-primary)]" />
               </div>
-              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+              <div className="text-4xl font-extrabold text-[var(--color-text-primary)] mb-2">
                 {stats.publications}
               </div>
-              <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="text-base font-medium text-[var(--color-text-secondary)]">
                 Publicaciones
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-secondary)]/10 mx-auto mb-3">
-                <Eye className="w-6 h-6 text-[var(--color-secondary)]" />
+          <Card className="border border-[var(--color-border)]/50 rounded-2xl">
+            <CardContent className="p-8 text-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/10 shadow-lg mx-auto mb-4">
+                <Eye className="w-8 h-8 text-[var(--color-primary)]" />
               </div>
-              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+              <div className="text-4xl font-extrabold text-[var(--color-text-primary)] mb-2">
                 {stats.views}
               </div>
-              <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="text-base font-medium text-[var(--color-text-secondary)]">
                 Visualizaciones
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-accent)]/10 mx-auto mb-3">
-                <MessageCircle className="w-6 h-6 text-[var(--color-accent)]" />
+          <Card className="border border-[var(--color-border)]/50 rounded-2xl">
+            <CardContent className="p-8 text-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/10 shadow-lg mx-auto mb-4">
+                <MessageCircle className="w-8 h-8 text-[var(--color-primary)]" />
               </div>
-              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+              <div className="text-4xl font-extrabold text-[var(--color-text-primary)] mb-2">
                 {stats.contacts}
               </div>
-              <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="text-base font-medium text-[var(--color-text-secondary)]">
                 Contactos
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-pink-100 mx-auto mb-3">
-                <Heart className="w-6 h-6 text-pink-500" />
+          <Card className="border border-[var(--color-border)]/50 rounded-2xl">
+            <CardContent className="p-8 text-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/10 shadow-lg mx-auto mb-4">
+                <Heart className="w-8 h-8 text-[var(--color-primary)]" />
               </div>
-              <div className="text-3xl font-bold text-[var(--color-text-primary)] mb-1">
+              <div className="text-4xl font-extrabold text-[var(--color-text-primary)] mb-2">
                 {stats.favorites}
               </div>
-              <div className="text-sm text-[var(--color-text-secondary)]">
+              <div className="text-base font-medium text-[var(--color-text-secondary)]">
                 Favoritos
               </div>
             </CardContent>
@@ -529,7 +536,7 @@ function DashboardContent() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-9 w-9 p-0 bg-white border-red-500 text-red-500 hover:bg-red-50 shadow-lg"
+                          className="h-9 w-9 p-0 bg-[var(--color-surface)] border-red-500 text-red-500 hover:bg-red-500/10 shadow-lg"
                           onClick={async (e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -661,7 +668,7 @@ function DashboardContent() {
                           </p>
                           {notification.relatedPetId && (
                             <Link href={`/pets/${notification.relatedPetId}`}>
-                              <Button variant="link" size="sm" className="p-0 h-auto mt-2">
+                              <Button variant="ghost" size="sm" className="p-0 h-auto mt-2">
                                 Ver mascota →
                               </Button>
                             </Link>
@@ -753,7 +760,7 @@ function DashboardContent() {
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <Badge variant={request.status === "pending" ? "default" : request.status === "approved" ? "secondary" : "destructive"}>
+                                  <Badge variant={request.status === "pending" ? "default" : request.status === "approved" ? "secondary" : "destructive"} className={request.status === "rejected" || request.status === "cancelled" ? "bg-red-500" : ""}>
                                     {request.status === "pending" ? "Pendiente" : request.status === "approved" ? "Aprobada" : request.status === "rejected" ? "Rechazada" : "Cancelada"}
                                   </Badge>
                                 </div>
@@ -770,7 +777,7 @@ function DashboardContent() {
                                   })}
                                 </p>
                                 <Link href={`/pets/${request.petId}`}>
-                                  <Button variant="link" size="sm" className="p-0 h-auto mt-2">
+                                  <Button variant="ghost" size="sm" className="p-0 h-auto mt-2">
                                     Ver mascota →
                                   </Button>
                                 </Link>
@@ -778,7 +785,7 @@ function DashboardContent() {
                               {request.status === "pending" && (
                                 <div className="flex gap-2">
                                   <Button
-                                    variant="default"
+                                    variant="primary"
                                     size="sm"
                                     onClick={async () => {
                                       if (confirm("¿Aprobar esta solicitud de adopción?")) {
@@ -851,7 +858,7 @@ function DashboardContent() {
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <Badge variant={request.status === "pending" ? "default" : request.status === "approved" ? "secondary" : "destructive"}>
+                                  <Badge variant={request.status === "pending" ? "default" : request.status === "approved" ? "secondary" : "destructive"} className={request.status === "rejected" || request.status === "cancelled" ? "bg-red-500" : ""}>
                                     {request.status === "pending" ? "Pendiente" : request.status === "approved" ? "Aprobada" : request.status === "rejected" ? "Rechazada" : "Cancelada"}
                                   </Badge>
                                 </div>
@@ -868,7 +875,7 @@ function DashboardContent() {
                                   })}
                                 </p>
                                 <Link href={`/pets/${request.petId}`}>
-                                  <Button variant="link" size="sm" className="p-0 h-auto mt-2">
+                                  <Button variant="ghost" size="sm" className="p-0 h-auto mt-2">
                                     Ver mascota →
                                   </Button>
                                 </Link>

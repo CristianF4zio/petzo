@@ -45,6 +45,10 @@ export const verifyFirebaseToken = async (
     }
 
     // Verificar el token con Firebase Admin
+    if (!firebaseAdmin) {
+      res.status(500).json({ error: "Firebase Admin no está inicializado" });
+      return;
+    }
     const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
 
     // Agregar la información del usuario al request

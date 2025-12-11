@@ -201,6 +201,10 @@ router.put(
       });
     }
 
+    if (!req.user) {
+      return res.status(401).json({ error: "Usuario no autenticado" });
+    }
+
     try {
       const updatedReport = await updateReportStatus(id, status, req.user.uid);
 

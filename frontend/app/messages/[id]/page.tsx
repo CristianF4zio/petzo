@@ -90,8 +90,8 @@ function ConversationContent() {
         try {
           const otherUser = await getUserById(otherParticipantId);
           setOtherParticipant({
-            id: otherUser.id,
-            name: otherUser.name || otherUser.email || "Usuario",
+            id: otherUser.uid,
+            name: otherUser.name || otherUser.displayName || otherUser.email || "Usuario",
             photoURL: otherUser.photoURL,
           });
         } catch (err) {
@@ -267,8 +267,10 @@ function ConversationContent() {
   const messageGroups = groupMessagesByDate(messages);
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] flex flex-col">
+    <div className="min-h-screen bg-[var(--color-background)] flex flex-col relative">
       <Navbar />
+      
+      {/* Sistema de partículas - Interactivo */}
 
       <div className="max-w-4xl mx-auto w-full px-6 lg:px-8 py-6 flex-1 flex flex-col">
         {/* Header */}
@@ -381,7 +383,7 @@ function ConversationContent() {
                           className={`rounded-lg px-4 py-2 ${
                             isOwnMessage
                               ? "bg-[var(--color-primary)] text-white"
-                              : "bg-white border border-[var(--color-border)]"
+                              : "bg-[var(--color-surface)] border border-[var(--color-border)]"
                           }`}
                         >
                           <p className="text-sm whitespace-pre-wrap break-words">

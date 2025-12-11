@@ -19,52 +19,52 @@ async function generateIndexLinks() {
     {
       name: "pets - ownerId + createdAt",
       collection: "pets",
-      query: () => db.collection("pets").where("ownerId", "==", "_test").orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("pets").where("ownerId", "==", "_test").orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "pets - city + type + createdAt",
       collection: "pets",
-      query: () => db.collection("pets").where("city", "==", "_test").where("type", "==", "dog").orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("pets").where("city", "==", "_test").where("type", "==", "dog").orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "favorites - userId + createdAt",
       collection: "favorites",
-      query: () => db.collection("favorites").where("userId", "==", "_test").orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("favorites").where("userId", "==", "_test").orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "favorites - petId + createdAt",
       collection: "favorites",
-      query: () => db.collection("favorites").where("petId", "==", "_test").orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("favorites").where("petId", "==", "_test").orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "adoptionRequests - petId + createdAt",
       collection: "adoptionRequests",
-      query: () => db.collection("adoptionRequests").where("petId", "==", "_test").orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("adoptionRequests").where("petId", "==", "_test").orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "adoptionRequests - requesterId + createdAt",
       collection: "adoptionRequests",
-      query: () => db.collection("adoptionRequests").where("requesterId", "==", "_test").orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("adoptionRequests").where("requesterId", "==", "_test").orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "adoptionRequests - ownerId + status + createdAt",
       collection: "adoptionRequests",
-      query: () => db.collection("adoptionRequests").where("ownerId", "==", "_test").where("status", "==", "pending").orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("adoptionRequests").where("ownerId", "==", "_test").where("status", "==", "pending").orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "messages - conversationId + createdAt",
       collection: "messages",
-      query: () => db.collection("messages").where("conversationId", "==", "_test").orderBy("createdAt", "asc").limit(1),
+      query: () => db!.collection("messages").where("conversationId", "==", "_test").orderBy("createdAt", "asc").limit(1),
     },
     {
       name: "messages - receiverId + read + createdAt",
       collection: "messages",
-      query: () => db.collection("messages").where("receiverId", "==", "_test").where("read", "==", false).orderBy("createdAt", "desc").limit(1),
+      query: () => db!.collection("messages").where("receiverId", "==", "_test").where("read", "==", false).orderBy("createdAt", "desc").limit(1),
     },
     {
       name: "conversations - participants + updatedAt",
       collection: "conversations",
-      query: () => db.collection("conversations").where("participants", "array-contains", "_test").orderBy("updatedAt", "desc").limit(1),
+      query: () => db!.collection("conversations").where("participants", "array-contains", "_test").orderBy("updatedAt", "desc").limit(1),
     },
   ];
 

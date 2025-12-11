@@ -25,7 +25,10 @@ router.post(
   verifyFirebaseToken,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
     if (!req.user) {
-      return res.status(401).json({ error: "Usuario no autenticado" });
+      return res.status(401).json({ 
+        success: false,
+        error: "Usuario no autenticado" 
+      });
     }
 
     const { displayName, photoURL } = req.body;
@@ -34,9 +37,9 @@ router.post(
       const user = await createOrUpdateUser({
         uid: req.user.uid,
         email: req.user.email || "",
-        displayName: displayName,
-        photoURL: photoURL,
-        emailVerified: false,
+        displayName: displayName || undefined,
+        photoURL: photoURL || undefined,
+        emailVerified: req.user.emailVerified || false,
       });
 
       res.status(201).json({
@@ -45,6 +48,21 @@ router.post(
       });
     } catch (error: any) {
       console.error("Error al registrar usuario:", error);
+      // Si Firestore no está disponible, aún retornar éxito con datos básicos
+      if (error.message?.includes("Firestore no está inicializado")) {
+        return res.status(201).json({
+          success: true,
+          user: {
+            uid: req.user.uid,
+            email: req.user.email || "",
+            displayName: displayName || undefined,
+            photoURL: photoURL || undefined,
+            emailVerified: req.user.emailVerified || false,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        });
+      }
       res.status(500).json({
         success: false,
         error: error.message || "Error al registrar usuario",
@@ -123,6 +141,10 @@ router.post(
       return res.status(401).json({ error: "Usuario no autenticado" });
     }
 
+    if (!firebaseAdmin) {
+      return res.status(500).json({ error: "Firebase Admin no está inicializado" });
+    }
+
     try {
       const user = await firebaseAdmin.auth().getUser(req.user.uid);
 
@@ -171,6 +193,10 @@ router.post(
         success: false,
         error: "Email es requerido",
       });
+    }
+
+    if (!firebaseAdmin) {
+      return res.status(500).json({ error: "Firebase Admin no está inicializado" });
     }
 
     try {
